@@ -32,6 +32,8 @@ const WashingMachineSlots = () => {
 
   console.log("The slots:",slots);
 
+
+
   useEffect(() => {
     const today = new Date();
     const startOfWeek = new Date(today);
@@ -50,7 +52,7 @@ const WashingMachineSlots = () => {
   }, [weekOffset]);
 
   useEffect(() => {
-    const socket = io('http://localhost:5000');
+    const socket = io('');
     socket.emit('update_slots', hostelName);
 
     socket.on('slots_updated', (updatedSlots) => {
@@ -77,7 +79,7 @@ const WashingMachineSlots = () => {
     
     try {
       // Check for existing slots
-      const checkResponse = await axios.post('http://localhost:5000/slots/check', newSlot);
+      const checkResponse = await axios.post('/slots/check', newSlot);
       console.log(checkResponse.data.message); // Display or handle the message if needed
   
       // If no existing slot, proceed to add a new slot
@@ -100,8 +102,8 @@ const WashingMachineSlots = () => {
     if (selectedDate && startTime && endTime) {
       const newSlot = { date: selectedDate, startTime, endTime, hostelName, roomNumber };
       // console.log(newSlot?.date);
-      await axios.post('http://localhost:5000/slots', newSlot);
-      const socket = io('http://localhost:5000');
+      await axios.post('/slots', newSlot);
+      const socket = io('');
       socket.emit('update_slots', hostelName);
       console.log('update_slots', hostelName);
 
@@ -172,8 +174,8 @@ const WashingMachineSlots = () => {
   const handleDeleteSlot = async (hostelName, dateKey, startTime, roomNumber) => {
     console.log("changing slots");
     
-    await axios.delete('http://localhost:5000/slots', { data: {hostelName, date: dateKey, startTime, roomNumber } });
-    const socket = io('http://localhost:5000');
+    await axios.delete('/slots', { data: {hostelName, date: dateKey, startTime, roomNumber } });
+    const socket = io('');
     socket.emit('update_slots', hostelName);
 
     const newSlots = { ...slots };
@@ -297,44 +299,48 @@ const WashingMachineSlots = () => {
               </tr>
             </thead>
             <tbody>
-  {timeSlots.map((time) => (
-    <tr key={time}>
-      <td>{time}</td>
-      {weekDates.map((date) => {
-        const dateKey = date.toISOString().split('T')[0]; // Convert date to YYYY-MM-DD
-        
-        // Ensure slots is an array and find a matching slot for the date and time
-        const slot = Array.isArray(slots)
-          ? slots.find(
-              (slot) =>
-                new Date(slot.formatted_date).toISOString().split('T')[0] === dateKey &&
-                isTimeWithinRange(time, slot.start_time, slot.end_time)
-            )
-          : null;
+            {timeSlots.map((time) => (
+  <tr key={time}>
+    <td>{time}</td>
+    {weekDates.map((date) => {
+      const dateKey = date.toLocaleDateString('en-CA'); // Using 'en-CA' gives a consistent 'YYYY-MM-DD' format in local time
 
-        return (
-          <td
-            key={`${dateKey}-${time}`}
-            className={slot ? 'selected-slot' : ''}
-          >
-            {slot ? (
-              <>
-                 {slot.room_number} {/* Display room_number if available */}
-                 {slot.room_number == roomNumber && <button
+      // Ensure slots is an array and find a matching slot for the date and time
+      const slot = Array.isArray(slots)
+        ? slots.find(
+            (slot) =>
+              new Date(slot.formatted_date).toLocaleDateString('en-CA') === dateKey &&
+              isTimeWithinRange(time, slot.start_time, slot.end_time)
+          )
+        : null;
+
+      return (
+        <td
+          key={`${dateKey}-${time}`}
+          className={slot ? 'selected-slot' : ''}
+        >
+          {slot ? (
+            <>
+              {slot.room_number} {/* Display room_number if available */}
+              {slot.room_number === roomNumber && (
+                <button
                   type="button"
                   className="delete-btn"
-                  onClick={() => handleDeleteSlot(slot.hostel_name, slot.formatted_date, slot.start_time, slot.room_number)}
+                  onClick={() =>
+                    handleDeleteSlot(slot.hostel_name, slot.formatted_date, slot.start_time, slot.room_number)
+                  }
                 >
                   <img src={delete_btn} style={{ width: '25px' }} alt="Delete" />
-                </button>}
-                
-              </>
-            ) : null}
-          </td>
-        );
-      })}
-    </tr>
-  ))}
+                </button>
+              )}
+            </>
+          ) : null}
+        </td>
+      );
+    })}
+  </tr>
+))}
+
 </tbody>
 
 

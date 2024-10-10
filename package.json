@@ -3,11 +3,16 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "engines":{
+    "node": "18.16.0",
+    "npm": "9.5.1"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start":"node index.js",
+    "heroku-postbuild":"cd client && npm install && npm run build"
   },
   "keywords": [],
-  "author": "",
+  "author": "Om Priyansh Singh",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",

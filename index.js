@@ -3,7 +3,14 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const { Pool } = require('pg');
+const path = require("path");
 const bcrypt = require('bcrypt');
+require("dotenv").config();
+
+const PORT = process.env.PORT || 5000;
+
+
+
 
 // Initialize Express and server
 const app = express();
@@ -15,14 +22,26 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
+// app.use(express.static(path.join(__dirname,"client/build")));
+
+if (process.env.NODE_ENV === "production"){
+  app.use(express.static(path.join(__dirname,"client/build")));
+}
+
 // PostgreSQL connection pool
-const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'wm_slots',
-  password: 'password',
-  port: 5432,
-});
+const devConfig = {
+  user: process.env.PG_USER,
+  host: process.env.PG_HOST,
+  database: process.env.PG_DATABASE,
+  password: process.env.PG_PASSWORD,
+  port: process.env.PG_PORT,
+}
+
+const proConfig = {
+  connectionString: process.env.DATABASE_URL //heroku addons
+}
+const pool = new Pool(process.env.NODE_ENV === "production" ? proConfig : devConfig
+);
 
 app.post('/login', async(req,res) => {
   const { hostelName, roomNumber, password } = req.body;
@@ -165,7 +184,7 @@ io.on('connection', (socket) => {
 });
 
 // Start the server
-const PORT = 5000;
+// const PORT = 5000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

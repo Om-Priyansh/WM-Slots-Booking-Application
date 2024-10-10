@@ -21,7 +21,7 @@ const LoginPage = () => {
 
     try {
       // Send POST request to the backend
-      const response = await axios.post('http://localhost:5000/login', {
+      const response = await axios.post('/login', {
         hostelName,
         roomNumber,
         password
