@@ -41,9 +41,15 @@ const devConfig = {
 }
 
 const proConfig = {
-  connectionString: process.env.DATABASE_URL //heroku addons
+  connectionString: process.env.POSTGRES_URL, //heroku addons
 }
-const pool = new Pool(process.env.NODE_ENV === "production" ? proConfig : devConfig
+
+console.log(PORT, process.env.POSTGRES_URL);
+const pool = new Pool(
+  // process.env.NODE_ENV === "production" ? proConfig : proConfig
+  {
+    connectionString: process.env.POSTGRES_URL, //heroku addons
+  }
 );
 
 app.post('/login', async(req,res) => {
