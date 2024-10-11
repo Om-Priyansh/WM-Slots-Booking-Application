@@ -52,7 +52,11 @@ const WashingMachineSlots = () => {
   }, [weekOffset]);
 
   useEffect(() => {
-    const socket = io('');
+    const socket = io('https://wm-slots-booking-app.vercel.app', {
+      transports: ['websocket', 'polling'],
+      withCredentials: true,
+    });
+
     socket.emit('update_slots', hostelName);
 
     socket.on('slots_updated', (updatedSlots) => {
@@ -103,7 +107,10 @@ const WashingMachineSlots = () => {
       const newSlot = { date: selectedDate, startTime, endTime, hostelName, roomNumber };
       // console.log(newSlot?.date);
       await axios.post('/slots', newSlot);
-      const socket = io('');
+      const socket = io('https://wm-slots-booking-app.vercel.app', {
+  transports: ['websocket', 'polling'],
+  withCredentials: true,
+});
       socket.emit('update_slots', hostelName);
       console.log('update_slots', hostelName);
 
@@ -175,7 +182,11 @@ const WashingMachineSlots = () => {
     console.log("changing slots");
     
     await axios.delete('/slots', { data: {hostelName, date: dateKey, startTime, roomNumber } });
-    const socket = io('');
+    const socket = io('https://wm-slots-booking-app.vercel.app', {
+      transports: ['websocket', 'polling'],
+      withCredentials: true,
+    });
+    
     socket.emit('update_slots', hostelName);
 
     const newSlots = { ...slots };
